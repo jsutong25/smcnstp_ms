@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "tailwindcss": "^3.4.13"
+  },
+  "scripts": {
+    "watch": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch",
+    "build-css": "tailwindcss build -i ./src/input.css -o ./src/output.css",
+    "watch-css": "tailwindcss build -i ./src/input.css -o ./src/output.css --watch",
+    "dev": "concurrently \"npm run watch-css\" \"npm start\"",
+    "start": "concurrently \"npm run watch-css\" \"live-server ./src\""
+  },
+  "dependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
