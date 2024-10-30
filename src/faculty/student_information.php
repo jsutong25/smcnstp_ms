@@ -39,40 +39,6 @@ $stmt->bind_param("i", $faculty_id);
 $stmt->execute();
 $sections_result = $stmt->get_result();
 
-
-if ($section_id) {
-    // Prepare query for activities related to the selected section
-    $activities_sql = "SELECT * FROM activities WHERE section_id = ? AND CONCAT(date, ' ', time) > NOW() ORDER BY date, time ASC";
-    $stmt = $conn->prepare($activities_sql);
-    if ($stmt) {
-        $stmt->bind_param("i", $section_id);
-        if ($stmt->execute()) {
-            $activities_result = $stmt->get_result();
-        } else {
-            echo "Query execution failed: " . $stmt->error;
-        }
-    } else {
-        echo "Query preparation failed: " . $conn->error;
-    }
-
-    // Prepare query for documentation related to the selected section
-    $documentation_sql = "SELECT * FROM documentation WHERE section_id = ? ORDER BY created_at ASC";
-    $stmt = $conn->prepare($documentation_sql);
-    if ($stmt) {
-        $stmt->bind_param("i", $section_id);
-        if ($stmt->execute()) {
-            $documentation_result = $stmt->get_result();
-        } else {
-            echo "Query execution failed: " . $stmt->error;
-        }
-    } else {
-        echo "Query preparation failed: " . $conn->error;
-    }
-}
-
-$sql = "SELECT * FROM documentation ORDER by created_at ASC";
-$result = mysqli_query($conn, $sql);
-
 $_SESSION['last_activity'] = time();
 
 ?>
@@ -204,7 +170,7 @@ $_SESSION['last_activity'] = time();
             <a href="./faculty_home.php?section_id=<?php echo $section_id; ?>"><span class="text-lg">SMC NSTP</span></a>
         </div>
 
-        <div class="mt-4 p-2 sm:ml-64">
+        <div class="mt-4 p-2 sm:ml-[210px]">
             <a href="./faculty_home.php?section_id=<?php echo $section_id; ?>"><svg class="transition ease-in-out hover:text-primary" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 42 42">
                     <path fill="currentColor" fill-rule="evenodd" d="M27.066 1L7 21.068l19.568 19.569l4.934-4.933l-14.637-14.636L32 5.933z" />
                 </svg></a>
@@ -213,7 +179,7 @@ $_SESSION['last_activity'] = time();
         <div class="flex h-screen w-full">
         <?php include '../sidebar_faculty.php'; ?>
 
-            <div class="flex-grow p-4 sm:ml-64">
+            <div class="flex-grow p-4 sm:ml-[210px]">
 
                 <div class="h-full">
                     <div class="">
@@ -224,6 +190,7 @@ $_SESSION['last_activity'] = time();
                         <table id="student" class="display" style="width:100%">
                             <thead>
                                 <tr>
+                                    <th class="uppercase">No.</th>
                                     <th class="uppercase">Award Year</th>
                                     <th class="uppercase">Program</th>
                                     <th class="uppercase">Region</th>
@@ -259,8 +226,10 @@ $_SESSION['last_activity'] = time();
 
                                 if ($result->num_rows > 0) {
                                     $ayear = date("Y");
+                                    $number = 1;
                                     while ($row = $result->fetch_assoc()) {
                                         echo "<tr>
+                                                <td class='uppercase'>$number</td>
                                                 <td class='uppercase'>$ayear</td>
                                                 <td class='uppercase'>{$row['program']}</td>
                                                 <td class='uppercase'>10</td>
@@ -283,6 +252,7 @@ $_SESSION['last_activity'] = time();
                                                 <td class='uppercase'>{$row['contact_number']}</td>
                                             </tr>";
                                     }
+                                    $number++;
                                 } else {
                                     echo "<tr><td colspan='15'>No data found</td></tr>";
                                 }
@@ -333,19 +303,15 @@ $_SESSION['last_activity'] = time();
         const button = document.querySelector('[data-drawer-toggle="logo-sidebar"]');
         const sidebar = document.getElementById('logo-sidebar');
 
-        // Function to toggle the sidebar
         const toggleSidebar = () => {
             sidebar.classList.toggle('-translate-x-full');
         };
 
-        // Event listener for the hamburger button
         button.addEventListener('click', toggleSidebar);
 
-        // Event listener for clicks outside the sidebar
         document.addEventListener('click', (event) => {
-            // Check if the click is outside the sidebar and the button
             if (!sidebar.contains(event.target) && !button.contains(event.target)) {
-                sidebar.classList.add('-translate-x-full'); // Close the sidebar
+                sidebar.classList.add('-translate-x-full');
             }
         });
     </script>
@@ -353,12 +319,12 @@ $_SESSION['last_activity'] = time();
     <script>
         window.onload = function() {
             <?php if (!empty($message)): ?>
-                document.getElementById('messageModal').classList.remove('hidden'); // Show modal
+                document.getElementById('messageModal').classList.remove('hidden');
             <?php endif; ?>
         };
 
         function closeModal() {
-            document.getElementById('messageModal').classList.add('hidden'); // Hide modal
+            document.getElementById('messageModal').classList.add('hidden');
         }
     </script>
 </body>
