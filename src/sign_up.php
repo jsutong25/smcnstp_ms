@@ -1,5 +1,8 @@
 <?php
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+session_start();
 $conn = new mysqli('localhost', 'root', '', 'smc_nstpms');
 
 if ($conn->connect_error) {
@@ -22,16 +25,19 @@ if (isset($_GET['section_id'])) {
     $section_name = $section['section_name'];
   } else {
     $_SESSION['error'] = 'Section not found. Please try again.';
-    header("Location: code.php");
+    header("Location: ./code.php");
     exit;
   }
 } else {
   $_SESSION['error'] = 'No section ID provided. Please enter a valid code.';
-  header("Location: code.php");
+  header("Location: ./code.php");
   exit;
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+  // var_dump($_POST);
+  
   $id_number = $_POST['id_number'];
   $program = $_POST['program'];
   $first_name = $_POST['first_name'];
@@ -51,12 +57,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $contact_number = $_POST['contact_number'];
   $section_id = $_POST['section_id'];
   $password = $_POST['password'];
-  $link = $_POST['link'];
   $user_type = 'student';
 
-  if (!preg_match("/^[a-zA-Z0-9._%+-]+@my\.smciligan\.edu\.ph$/", $email)) {
-    $error_message = "Email must be from @my.smciligan.edu.ph domain.";
-    exit();
+  if (!preg_match("/@my\.smciligan\.edu\.ph$/", $email)) {
+    $error_message = "Please use an email address ending with @my.smciligan.edu.ph";
+    header("Location: ./sign_up.php?section_id=$section_id");
+    exit;
   }
 
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -66,7 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   if ($stmt->execute()) {
     echo "Sign up successful";
-    header("Location: index.php");
+    header("Location: ./index.php");
+    exit();
   } else {
     $error_message = "Error: " . $stmt->error;
   }
@@ -110,7 +117,6 @@ $conn->close();
       </div>
       <div class="">
         <form action="" class="flex flex-col" method="POST">
-          <input type="hidden" name="link" value="<?php echo htmlspecialchars($link); ?>">
 
           <label for="id_number">School ID Number:<span class="text-primary ml-1">*</span></label>
           <input autocomplete="off" class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2" style="padding-left: 2em; padding-right: 2em;" name="id_number" placeholder="Enter your school id number (Format: C00-0000)" type="text" required>
@@ -132,19 +138,21 @@ $conn->close();
           <label for="last_name">Last Name:<span class="text-primary ml-1">*</span></label>
           <input autocomplete="off" class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2" style="padding-left: 2em; padding-right: 2em;" name="last_name" placeholder="Enter your last name" type="text" required>
 
-          <label for="extension">Suffix (Ex: II, Jr.):</label>
-          <input autocomplete="off" class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2" style="padding-left: 2em; padding-right: 2em;" name="extension" placeholder="Enter your last name" type="text">
+          <label for="extension">Suffix (Leave blank if none):</label>
+          <input autocomplete="off" class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2" style="padding-left: 2em; padding-right: 2em;" name="extension" placeholder="Enter your extension name" type="text">
 
           <label class="text-[16px]" for="email">Email<span class="text-primary ml-1">*</span></label>
           <input autocomplete="off"
-            class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2"
-            style="padding-left: 2em; padding-right: 2em;"
-            name="email"
-            placeholder="Enter your email"
-            type="email"
-            pattern="[a-zA-Z0-9._%+-]+@my\.smciligan\.edu\.ph"
-            title="Email must be from @my.smciligan.edu.ph domain"
-            required>
+              class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2"
+              style="padding-left: 2em; padding-right: 2em;"
+              name="email"
+              id="email"
+              placeholder="Enter your email"
+              type="email"
+              pattern="[a-zA-Z0-9._%+-]+@my\.smciligan\.edu\.ph"
+              title="Email must be from @my.smciligan.edu.ph domain"
+              required
+              oninput="validateEmail()">
 
           <label for="birthday">Birthday<span class="text-primary ml-1">*</span></label>
           <input autocomplete="off" class="bg-bg border-2 border-white rounded-full py-3 mt-2 mb-2" style="padding-left: 2em; padding-right: 2em;" name="birthday" type="date" required>
@@ -189,6 +197,23 @@ $conn->close();
       </div>
     </div>
   </section>
+
+
+  <script>
+  function validateEmail() {
+    const emailInput = document.getElementById('email');
+    const emailValue = emailInput.value;
+
+    // Check if the email ends with the required domain
+    const requiredDomain = "@my.smciligan.edu.ph";
+    if (emailValue && !emailValue.endsWith(requiredDomain)) {
+      emailInput.setCustomValidity("Please use an email address ending with " + requiredDomain);
+      emailInput.reportValidity(); // Show the custom message
+    } else {
+      emailInput.setCustomValidity(""); // Reset the validity state
+    }
+  }
+</script>
 </body>
 
 </html>
